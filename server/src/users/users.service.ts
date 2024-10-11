@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient, User } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -13,10 +13,14 @@ export class UsersService {
     });
   }
 
-  async findOne(id: number): Promise<User | null> {
-    return this.prisma.user.findUnique({
+  async findOne(id: number): Promise<User> {
+    const user = await this.prisma.user.findUnique({
       where: { id },
     });
+    if (!user) {
+      throw new NotFoundException('Користувача не знайдено');
+    }
+    return user;
   }
 
   async findByEmail(email: string): Promise<User | null> {

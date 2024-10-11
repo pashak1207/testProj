@@ -2,15 +2,16 @@ import { Controller, Get, Body, Param, Put, Delete, ParseIntPipe, UseGuards } fr
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { User as UserDecorator } from '../common/decorators/user.decorator';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findOne(id);
+  @Get('me')
+  async getMe(@UserDecorator() user: any) {
+    return this.usersService.findOne(user.userId);
   }
 
   @UseGuards(JwtAuthGuard)

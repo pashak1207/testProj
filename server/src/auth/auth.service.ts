@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -31,66 +32,79 @@ export class AuthService {
     return result;
   }
 
-  async login(loginUserDto: LoginUserDto) {
+  async login(loginUserDto: LoginUserDto, res: Response) {
     const user = await this.usersService.findByEmail(loginUserDto.email);
     if (!user) {
-      throw new UnauthorizedException('Невірний email або пароль');
+      throw new UnauthorizedException('Incorrect email or password');
     }
 
     const isMatch = await bcrypt.compare(loginUserDto.password, user.password);
     if (!isMatch) {
-      throw new UnauthorizedException('Невірний email або пароль');
+      throw new UnauthorizedException('Incorrect email or password');
     }
 
     const payload = { sub: user.id, email: user.email };
-    const accessToken = this.jwtService.sign(payload);
-
-    const refreshTokenPayload = { sub: user.id, email: user.email };
-    const refreshToken = this.jwtService.sign(refreshTokenPayload, {
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'refresh_default_secret',
       expiresIn: '7d',
     });
 
-    return {
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    };
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return { message: 'You are successfully logged in' };
   }
 
-  async refresh(refreshTokenDto: RefreshTokenDto) {
+  async refresh(refreshTokenDto: RefreshTokenDto, res: Response) {
     const { refreshToken } = refreshTokenDto;
 
     try {
-      const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'refresh_default_secret',
+      const payload = this.jwtService.verify(refreshToken);
+      const user = await this.usersService.findByEmail(payload.email);
+
+      if (!user) {
+        throw new UnauthorizedException('Wrong Refresh Token');
+      }
+
+      const newPayload = { sub: user.id, email: user.email };
+      const newAccessToken = this.jwtService.sign(newPayload, { expiresIn: '15m' });
+      const newRefreshToken = this.jwtService.sign(newPayload, { expiresIn: '7d' });
+
+      res.cookie('access_token', newAccessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 15 * 60 * 1000,
       });
 
-      const newAccessToken = this.jwtService.sign(
-        { sub: payload.sub, email: payload.email },
-        {
-          secret: this.configService.get<string>('JWT_SECRET') || 'default_secret',
-          expiresIn: '15m',
-        },
-      );
+      res.cookie('refresh_token', newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
 
-      const newRefreshToken = this.jwtService.sign(
-        { sub: payload.sub, email: payload.email },
-        {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET') || 'refresh_default_secret',
-          expiresIn: '7d',
-        },
-      );
-
-      return {
-        access_token: newAccessToken,
-        refresh_token: newRefreshToken,
-      };
+      return { message: 'Tokens have been updated' };
     } catch (error) {
-      throw new UnauthorizedException('Невірний або прострочений Refresh Token');
+      throw new UnauthorizedException('Invalid or expired Refresh Token');
     }
   }
 
-  async logout() {
-    return { message: 'Ви успішно вийшли з системи' };
+  async logout(res: Response) {
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+    return { message: 'You have successfully logged out' };
   }
 }
