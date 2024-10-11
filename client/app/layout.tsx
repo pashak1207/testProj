@@ -1,21 +1,33 @@
 import type { Metadata } from "next";
-import { Provider } from 'react-redux';
-import { store } from '@/store/index';
+import { ThemeProvider } from 'next-themes';
 import "./globals.css";
+import Header from "@/components/Header";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Test Project",
 };
 
-export default function RootLayout ({
-  children,
-}: Readonly<{
+type LayoutProps = {
   children: React.ReactNode;
-}>) {
+};
+
+export default function Layout ({ children }: LayoutProps) {
   return (
-    <html lang="en">
-      <body>
-        <Provider store={ store }>{ children }</Provider>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <ThemeProvider attribute="class">
+          <>
+            <Toaster toastOptions={ {
+              style: {
+                background: 'var(--background)',
+                color: 'var(--foreground)'
+              },
+            } } position="top-right" />
+            <Header />
+            <main>{ children }</main>
+          </>
+        </ThemeProvider>
       </body>
     </html>
   );
