@@ -58,49 +58,84 @@ export default function Profile () {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-800">
-      <h1 className="text-2xl mb-4">Profile</h1>
-      { user ? (
-        <form onSubmit={ handleUpdate } className="flex flex-col space-y-4 min-w-64">
-          <input
-            type="text"
-            value={ formData.name }
-            className="p-2 rounded-md"
-            placeholder="Name"
-            autoComplete='true'
-            onChange={ (e) => setFormData({ ...formData, name: e.target.value }) }
-          />
-          <input
-            type="email"
-            value={ formData.email }
-            className="p-2 rounded-md"
-            placeholder="Email"
-            autoComplete='true'
-            onChange={ (e) => setFormData({ ...formData, email: e.target.value }) }
-          />
-          <input
-            type="password"
-            value={ formData.password }
-            className="p-2 rounded-md"
-            placeholder="New Password"
-            autoComplete='true'
-            onChange={ (e) => setFormData({ ...formData, password: e.target.value }) }
-          />
-          <input
-            type="password"
-            value={ formData.confirmPassword }
-            className="p-2 rounded-md"
-            placeholder="Confirm New Password"
-            autoComplete='true'
-            onChange={ (e) => setFormData({ ...formData, confirmPassword: e.target.value }) }
-          />
-          <button type="submit" className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 transition-colors">
-            Update Profile
-          </button>
-        </form>
-      ) : (
-        <p>Loading...</p>
-      ) }
+    <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
+      <div className="w-full max-w-md space-y-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+        <div className="text-center">
+          <h2 className="mt-2 text-3xl font-extrabold text-gray-900 dark:text-white">
+            Update Your Profile
+          </h2>
+        </div>
+        { user ? (
+          <form className="mt-8 space-y-6" onSubmit={ handleUpdate }>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  value={ formData.name }
+                  onChange={ (e) => setFormData({ ...formData, name: e.target.value }) }
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  placeholder="Name"
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={ formData.email }
+                  onChange={ (e) => setFormData({ ...formData, email: e.target.value }) }
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  placeholder="Email"
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  New Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={ formData.password }
+                  onChange={ (e) => setFormData({ ...formData, password: e.target.value }) }
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  placeholder="New Password"
+                />
+              </div>
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Confirm New Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={ formData.confirmPassword }
+                  onChange={ (e) => setFormData({ ...formData, confirmPassword: e.target.value }) }
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  placeholder="Confirm New Password"
+                />
+              </div>
+            </div>
+            <div>
+              <button
+                type="submit"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                Update Profile
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="text-center">
+            <p className="text-lg font-medium text-gray-600 dark:text-gray-300">Loading...</p>
+          </div>
+        ) }
+      </div>
     </div>
   );
 }
