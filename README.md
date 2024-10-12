@@ -12,14 +12,10 @@ Before starting, make sure you have the following installed on your machine:
 
 ## Setup Instructions
 
-### Step 1: Start Docker Services
-
-First, you'll need to bring up the necessary Docker services (like the database and other dependencies) using Docker Compose.
-
 1. `docker-compose up -d`
 
 2. `cd /server`
    `yarn start:dev`
 
 3. `cd ../client`
-   `yarn start dev`
+   `yarn dev`
